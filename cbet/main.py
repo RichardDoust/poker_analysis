@@ -56,7 +56,8 @@ def pf_caller(hh_text):
         for line in lines:
             if "calls" in line:
                 caller = line.split(":")[0]
-                return caller
+                
+    return caller
 
 
 def cbet_and_fold(hh_text):
@@ -69,35 +70,35 @@ def cbet_and_fold(hh_text):
     result = ""
     for line in lines:
         if pfcer in line and "bets" in line:
-            print("\n")
-            print("DONK")
-            print("DONK")
-            print("DONK")
-            print(hh_text)
+            # print("\n")
+            # print("DONK")
+            # print("DONK")
+            # print("DONK")
+            # print(hh_text)
             result = "donk"
             break
         if pfrer in line and "checks" in line:
-            print("\n")
-            print("DOESN'T CBET")
-            print("DOESN'T CBET")
-            print("DOESN'T CBET")
-            print(hh_text)
+            # print("\n")
+            # print("DOESN'T CBET")
+            # print("DOESN'T CBET")
+            # print("DOESN'T CBET")
+            # print(hh_text)
             result = "no_cbet"
             break
         if pfcer in line and "raises" in line:
-            print("\n")
-            print("FAILED CBET")
-            print("FAILED CBET")
-            print("FAILED CBET")
-            print(hh_text)
+            # print("\n")
+            # print("FAILED CBET")
+            # print("FAILED CBET")
+            # print("FAILED CBET")
+            # print(hh_text)
             result = False
             break
         if pfcer in line and "calls" in line:
-            print("\n")
-            print("FAILED CBET")
-            print("FAILED CBET")
-            print("FAILED CBET")
-            print(hh_text)
+            # print("\n")
+            # print("FAILED CBET")
+            # print("FAILED CBET")
+            # print("FAILED CBET")
+            # print(hh_text)
             result = False
             break
 
@@ -117,9 +118,15 @@ def has_no_turn(hh_text):
 
 def read_data():
 
-    connection = connect_postgres_db()
+    # connection = connect_postgres_db()
+
+    connection = psycopg2.connect(user="postgres",
+                                  password="dbpass",
+                                  host="127.0.0.1",
+                                  port="5432",
+                                  database="PT4 DB")
     cursor = connection.cursor()
-    postgreSQL_select_Query = "select * from cash_hand_histories limit 10000;"
+    postgreSQL_select_Query = "select * from cash_hand_histories order by id_hand limit 100000;"
 
     cursor.execute(postgreSQL_select_Query)
     histories = cursor.fetchall()
@@ -136,18 +143,14 @@ def read_data():
                 if srp_pf(row[1]) and has_no_turn(row[1]):
                     if cbet_and_fold(row[1]) == "donk":
                         count_donk += 1
-                        print(count_donk)
                         continue
                     if cbet_and_fold(row[1]) == "no_cbet":
                         count_no_cbet += 1
-                        print(count_no_cbet)
                         continue
                     if cbet_and_fold(row[1]):
                         count_cbet_fold += 1
-                        print(count_cbet_fold)
                     else:
                         count_failed_cbet += 1
-                        print(count_failed_cbet)
 
     print(count_cbet_fold)
     print(count_failed_cbet)
@@ -156,6 +159,7 @@ def read_data():
 
     cursor.close()
     connection.close()
+
 
 if __name__ == "__main__":
 
