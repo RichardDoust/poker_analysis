@@ -26,10 +26,17 @@ def has_flop(hh_text):
         return True
 
 
+def has_pfr(pf_text):
+    if "raises" in pf_text:
+        return True
+
+
 def srp_pf(hh_text):
-    lines = hh_text.split("*** HOLE CARDS ***")[1].split("*** FLOP ***")[0].split("\n")
-    for line in lines:
-        print(line)
+    pf_action = hh_text.split("*** HOLE CARDS ***")[1].split("*** FLOP ***")[0].strip()
+    if has_pfr(pf_action):
+        lines = pf_action.split("\n")
+        if len(lines) == 7:
+            return True
 
 def read_data():
 
@@ -45,8 +52,8 @@ def read_data():
     count = 0
     for row in histories:
         if limit_10nl(row[1]) and has_flop(row[1]):
-            srp_pf(row[1])
-            count += 1
+            if srp_pf(row[1]):
+                count += 1
 
     print(count)
 
