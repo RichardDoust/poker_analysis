@@ -14,20 +14,30 @@ def connect_postgres_db():
     return connection
 
 
+def limit_10nl(hh_text):
+    lines = hh_text.split("\n")
+    for line in lines:
+        if "($0.05/$0.10)" in line:
+            return True
+
+
 def read_data():
 
     connection = connect_postgres_db()
     cursor = connection.cursor()
-    postgreSQL_select_Query = "select * from cash_hand_histories limit 100;"
+    postgreSQL_select_Query = "select * from cash_hand_histories limit 10000;"
 
     cursor.execute(postgreSQL_select_Query)
     histories = cursor.fetchall()
 
+    # TODO: limit, heads up, PF raise and call, F xf/f
     print("Print each row and it's columns values")
+    count = 0
     for row in histories:
-        print(row[0])
-        print(row[1])
+        if limit_10nl(row[1]):
+            count += 1
 
+    print(count)
 
 if __name__ == "__main__":
 
