@@ -21,6 +21,16 @@ def limit_10nl(hh_text):
             return True
 
 
+def has_flop(hh_text):
+    if "*** FLOP ***" in hh_text:
+        return True
+
+
+def srp_pf(hh_text):
+    lines = hh_text.split("*** HOLE CARDS ***")[1].split("*** FLOP ***")[0].split("\n")
+    for line in lines:
+        print(line)
+
 def read_data():
 
     connection = connect_postgres_db()
@@ -34,7 +44,8 @@ def read_data():
     print("Print each row and it's columns values")
     count = 0
     for row in histories:
-        if limit_10nl(row[1]):
+        if limit_10nl(row[1]) and has_flop(row[1]):
+            srp_pf(row[1])
             count += 1
 
     print(count)
