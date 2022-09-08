@@ -131,8 +131,6 @@ def cbet(hh_text):
         if pfrer in line and "bets" in line:
             if "folds" in lines[i+1]:
                 result = "cbet_success"
-                print("\n")
-                print(hh_text)
             else:
                 result = "cbet_failed"
             break
@@ -149,6 +147,39 @@ def heads_up(hh_text):
         result = True
 
     return result
+
+
+def cbet_30_pct(hh_text):
+    pf_action = hh_text.split("*** HOLE CARDS ***")[1].split("*** FLOP ***")[0].strip()
+    pot = float(0.15)
+    if "all-in" not in pf_action:
+        lines = pf_action.split("\n")
+        for line in lines:
+            if ":" in line and "$" in line.split(":")[1]:
+                add_amt = float(line.split("$")[-1].strip())
+                pot += add_amt
+
+    pfrer = pf_raiser(hh_text)
+    if "*** TURN ***" in hh_text:
+        f_action = hh_text.split("*** FLOP ***")[1].split("*** TURN ***")[0].strip()
+    else:
+        f_action = hh_text.split("*** FLOP ***")[1].split("*** SUMMARY ***")[0].strip()
+
+    cbet_amt = float(1000)
+    cbet_30 = False
+    if "all-in" not in f_action:
+        f_lines = f_action.split("\n")
+        for line in f_lines:
+            if pfrer in line and "bets" in line:
+                cbet_amt = float(line.split("$")[-1].strip())
+                break
+
+        cbet_pct = cbet_amt / pot
+        if cbet_pct >= 0.25 and cbet_pct <= 0.35:
+            cbet_30 = True
+
+    return cbet_30
+
 
 
 def read_data():
@@ -175,12 +206,13 @@ def read_data():
             if has_flop(row[1]):
                 if srp_pf(row[1]):
                     if heads_up(row[1]):
-                        if cbet(row[1]) == "cbet_success":
-                            count_cbet_success += 1
-                            continue
-                        if cbet(row[1]) == "cbet_failed":
-                            count_cbet_failed += 1
-                            continue
+                        if cbet_30_pct(row[1]):
+                            if cbet(row[1]) == "cbet_success":
+                                count_cbet_success += 1
+                                continue
+                            if cbet(row[1]) == "cbet_failed":
+                                count_cbet_failed += 1
+                                continue
 
     print("cbet success: " + str(count_cbet_success))
     print("cbet failed: " + str(count_cbet_failed))
