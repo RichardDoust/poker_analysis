@@ -56,8 +56,7 @@ def pf_caller(hh_text):
         for line in lines:
             if "calls" in line:
                 caller = line.split(":")[0]
-                
-    return caller
+                return caller
 
 
 def cbet_and_fold(hh_text):
@@ -112,9 +111,35 @@ def cbet_and_fold(hh_text):
 
     return result
 
+
 def has_no_turn(hh_text):
     if "*** TURN ***" not in hh_text:
         return True
+
+
+def cbet(hh_text):
+    result = ""
+    pfrer = pf_raiser(hh_text)
+    if "*** TURN ***" in hh_text:
+        f_action = hh_text.split("*** FLOP ***")[1].split("*** TURN ***")[0].strip()
+    else:
+        f_action = hh_text.split("*** FLOP ***")[1].split("*** SUMMARY ***")[0].strip()
+
+    lines = f_action.split("\n")
+    i = 0
+    for line in lines:
+        if pfrer in line and "bets" in line:
+            if "folds" in lines[i+1]:
+                result = "cbet_success"
+            else:
+                result = "cbet_failed"
+                print("\n")
+                print(hh_text)
+            break
+        i += 1
+
+    return result
+
 
 def read_data():
 
@@ -133,27 +158,26 @@ def read_data():
 
     # TODO: limit, heads up, PF raise and call, F xf/f
     print("Print each row and it's columns values")
-    count_cbet_fold = 0
-    count_failed_cbet = 0
+    count_cbet_success = 0
+    count_cbet_failed = 0
     count_no_cbet = 0
     count_donk = 0
     for row in histories:
         if limit_10nl(row[1]):
             if has_flop(row[1]):
-                if srp_pf(row[1]) and has_no_turn(row[1]):
-                    if cbet_and_fold(row[1]) == "donk":
-                        count_donk += 1
+                if srp_pf(row[1]):
+                    if cbet(row[1]) == "cbet_success":
+                        count_cbet_success += 1
                         continue
-                    if cbet_and_fold(row[1]) == "no_cbet":
-                        count_no_cbet += 1
+                    if cbet(row[1]) == "cbet_failed":
+                        count_cbet_failed += 1
                         continue
-                    if cbet_and_fold(row[1]):
-                        count_cbet_fold += 1
-                    else:
-                        count_failed_cbet += 1
 
-    print(count_cbet_fold)
-    print(count_failed_cbet)
+    print("cbet success: " + str(count_cbet_success))
+    print("cbet failed: " + str(count_cbet_failed))
+    print("total hands cbet: " + str(count_cbet_success + count_cbet_success))
+    print("cbet success %: " + str(count_cbet_success/ (count_cbet_success + count_cbet_failed)))
+    print(count_cbet_failed)
     print(count_no_cbet)
     print(count_donk)
 
