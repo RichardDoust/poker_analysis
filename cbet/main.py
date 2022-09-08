@@ -131,12 +131,22 @@ def cbet(hh_text):
         if pfrer in line and "bets" in line:
             if "folds" in lines[i+1]:
                 result = "cbet_success"
-            else:
-                result = "cbet_failed"
                 print("\n")
                 print(hh_text)
+            else:
+                result = "cbet_failed"
             break
         i += 1
+
+    return result
+
+
+def heads_up(hh_text):
+    result = False
+    pf_action = hh_text.split("*** HOLE CARDS ***")[1].split("*** FLOP ***")[0].strip()
+    no_calls = pf_action.count("calls")
+    if no_calls < 2:
+        result = True
 
     return result
 
@@ -160,26 +170,22 @@ def read_data():
     print("Print each row and it's columns values")
     count_cbet_success = 0
     count_cbet_failed = 0
-    count_no_cbet = 0
-    count_donk = 0
     for row in histories:
         if limit_10nl(row[1]):
             if has_flop(row[1]):
                 if srp_pf(row[1]):
-                    if cbet(row[1]) == "cbet_success":
-                        count_cbet_success += 1
-                        continue
-                    if cbet(row[1]) == "cbet_failed":
-                        count_cbet_failed += 1
-                        continue
+                    if heads_up(row[1]):
+                        if cbet(row[1]) == "cbet_success":
+                            count_cbet_success += 1
+                            continue
+                        if cbet(row[1]) == "cbet_failed":
+                            count_cbet_failed += 1
+                            continue
 
     print("cbet success: " + str(count_cbet_success))
     print("cbet failed: " + str(count_cbet_failed))
     print("total hands cbet: " + str(count_cbet_success + count_cbet_success))
     print("cbet success %: " + str(count_cbet_success/ (count_cbet_success + count_cbet_failed)))
-    print(count_cbet_failed)
-    print(count_no_cbet)
-    print(count_donk)
 
     cursor.close()
     connection.close()
