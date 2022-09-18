@@ -1,0 +1,8 @@
+Cbet between 25% and 35%
+
+cbet success: 6620
+cbet failed: 12086
+total hands cbet: 13240
+cbet success %: 0.35389714530097294
+alpha: 0.23
+overfolding: 12%
