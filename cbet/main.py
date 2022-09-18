@@ -181,6 +181,30 @@ def cbet_30_pct(hh_text):
     return cbet_30
 
 
+def pf_raiser_btn(hh_text):
+    pfr = pf_raiser(hh_text)
+    lines = hh_text.strip().split("\n")
+    btn = False
+    for line in lines:
+        if pfr in line and "Seat 1" in line:
+            btn = True
+            break
+
+    return btn
+
+
+def pf_caller_bb(hh_text):
+    pfc = pf_caller(hh_text)
+    lines = hh_text.strip().split("\n")
+    bb = False
+    for line in lines:
+        if pfc in line and "Seat 3" in line:
+            bb = True
+            break
+
+    return bb
+
+
 
 def read_data():
 
@@ -206,18 +230,24 @@ def read_data():
             if has_flop(row[1]):
                 if srp_pf(row[1]):
                     if heads_up(row[1]):
-                        if cbet_30_pct(row[1]):
-                            if cbet(row[1]) == "cbet_success":
-                                count_cbet_success += 1
-                                continue
-                            if cbet(row[1]) == "cbet_failed":
-                                count_cbet_failed += 1
-                                continue
+                        if pf_raiser_btn(row[1]):
+                            if pf_caller_bb(row[1]):
+                                if cbet_30_pct(row[1]):
+                                    if cbet(row[1]) == "cbet_success":
+                                        count_cbet_success += 1
+                                        print(row[1])
+                                        continue
+                                    if cbet(row[1]) == "cbet_failed":
+                                        count_cbet_failed += 1
+                                        continue
+                                        print(row[1])
 
     print("cbet success: " + str(count_cbet_success))
     print("cbet failed: " + str(count_cbet_failed))
     print("total hands cbet: " + str(count_cbet_success + count_cbet_success))
-    print("cbet success %: " + str(count_cbet_success/ (count_cbet_success + count_cbet_failed)))
+    total = count_cbet_success + count_cbet_failed
+    if total > 0:
+        print("cbet success %: " + str(count_cbet_success/ (total)))
 
     cursor.close()
     connection.close()
