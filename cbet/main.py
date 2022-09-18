@@ -149,7 +149,7 @@ def heads_up(hh_text):
     return result
 
 
-def cbet_30_pct(hh_text):
+def cbet_pct(hh_text):
     pf_action = hh_text.split("*** HOLE CARDS ***")[1].split("*** FLOP ***")[0].strip()
     pot = float(0.15)
     if "all-in" not in pf_action:
@@ -166,7 +166,7 @@ def cbet_30_pct(hh_text):
         f_action = hh_text.split("*** FLOP ***")[1].split("*** SUMMARY ***")[0].strip()
 
     cbet_amt = float(1000)
-    cbet_30 = False
+    cbet_30_50_75 = ""
     if "all-in" not in f_action:
         f_lines = f_action.split("\n")
         for line in f_lines:
@@ -176,9 +176,13 @@ def cbet_30_pct(hh_text):
 
         cbet_pct = cbet_amt / pot
         if cbet_pct >= 0.25 and cbet_pct <= 0.35:
-            cbet_30 = True
+            cbet_30_50_75 = 30
+        if cbet_pct >= 0.45 and cbet_pct <= 0.55:
+            cbet_30_50_75 = 50
+        if cbet_pct >= 0.70 and cbet_pct <= 0.80:
+            cbet_30_50_75 = 75
 
-    return cbet_30
+    return cbet_30_50_75
 
 
 def pf_raiser_btn(hh_text):
@@ -205,6 +209,19 @@ def pf_caller_bb(hh_text):
     return bb
 
 
+def pf_raiser_sb(hh_text):
+    pfr = pf_raiser(hh_text)
+    lines = hh_text.strip().split("\n")
+    sb = False
+    for line in lines:
+        if pfr in line and "Seat 2" in line:
+            sb = True
+            break
+
+    return sb
+
+
+
 
 def read_data():
 
@@ -216,13 +233,11 @@ def read_data():
                                   port="5432",
                                   database="PT4 DB")
     cursor = connection.cursor()
-    postgreSQL_select_Query = "select * from cash_hand_histories order by id_hand limit 100000;"
+    postgreSQL_select_Query = "select * from cash_hand_histories order by id_hand;"
 
     cursor.execute(postgreSQL_select_Query)
     histories = cursor.fetchall()
 
-    # TODO: limit, heads up, PF raise and call, F xf/f
-    print("Print each row and it's columns values")
     count_cbet_success = 0
     count_cbet_failed = 0
     for row in histories:
@@ -230,22 +245,23 @@ def read_data():
             if has_flop(row[1]):
                 if srp_pf(row[1]):
                     if heads_up(row[1]):
-                        if pf_raiser_btn(row[1]):
+                        # if pf_raiser_btn(row[1]):
+                        if pf_raiser_sb(row[1]):
                             if pf_caller_bb(row[1]):
-                                if cbet_30_pct(row[1]):
+                                if cbet_pct(row[1]) == 50:
                                     if cbet(row[1]) == "cbet_success":
                                         count_cbet_success += 1
-                                        print(row[1])
+                                        # print(row[1])
                                         continue
                                     if cbet(row[1]) == "cbet_failed":
                                         count_cbet_failed += 1
+                                        # print(row[1])
                                         continue
-                                        print(row[1])
 
     print("cbet success: " + str(count_cbet_success))
     print("cbet failed: " + str(count_cbet_failed))
-    print("total hands cbet: " + str(count_cbet_success + count_cbet_success))
     total = count_cbet_success + count_cbet_failed
+    print("total hands cbet: " + str(total))
     if total > 0:
         print("cbet success %: " + str(count_cbet_success/ (total)))
 

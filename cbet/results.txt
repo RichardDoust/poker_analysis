@@ -1,8 +1,35 @@
 Cbet between 25% and 35%
-
 cbet success: 6620
 cbet failed: 12086
 total hands cbet: 13240
 cbet success %: 0.35389714530097294
 alpha: 0.23
 overfolding: 12%
+
+
+BTN vs BB 30% cbet
+cbet success: 1470
+cbet failed: 2235
+total hands cbet: 3705
+cbet success %: 0.3967611336032389
+
+
+SB vs BB 30% cbet
+cbet success: 984
+cbet failed: 2021
+total hands cbet: 3005
+cbet success %: 0.3274542429284526
+
+
+SB vs BB 50% cbet
+cbet success: 337
+cbet failed: 460
+total hands cbet: 797
+cbet success %: 0.4228356336260979
+
+
+SB vs BB 75% cbet
+cbet success: 27
+cbet failed: 23
+total hands cbet: 50
+cbet success %: 0.54
